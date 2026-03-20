@@ -70,7 +70,7 @@ tell application "Google Chrome"
                         var style = window.getComputedStyle(clickTargets[j]);
                         if (style.pointerEvents !== 'none' && style.opacity !== '0') {
                             clickTargets[j].click();
-                            return 'SUCCESS: 퇴근 버튼 클릭 완료' + (checkinTime ? '|CHECKIN:' + checkinTime : '');
+                            return 'CLICKED_FIRST' + (checkinTime ? '|CHECKIN:' + checkinTime : '');
                         }
                     }
                 }
@@ -92,6 +92,46 @@ tell application "Google Chrome"
             })();
         ")
     end tell
+
+    -- 첫 번째 퇴근 버튼 클릭 후 확인 페이지 처리
+    if checkoutResult starts with "CLICKED_FIRST" then
+        -- 확인 페이지 로드 대기
+        delay 3
+
+        -- 확인 페이지에서 퇴근 버튼 클릭
+        tell active tab of front window
+            set confirmResult to (execute javascript "
+                (function() {
+                    // 확인 페이지의 퇴근 버튼 찾기
+                    var buttons = document.querySelectorAll('button, a, div[role=button]');
+                    for (var i = 0; i < buttons.length; i++) {
+                        var t = buttons[i].textContent.trim();
+                        if (t === '퇴근') {
+                            var style = window.getComputedStyle(buttons[i]);
+                            if (style.pointerEvents !== 'none' && style.opacity !== '0') {
+                                buttons[i].click();
+                                return 'SUCCESS';
+                            }
+                        }
+                    }
+                    return 'FAIL: 확인 페이지에서 퇴근 버튼을 찾지 못했습니다.';
+                })();
+            ")
+        end tell
+
+        -- CHECKIN 정보 보존
+        set checkinInfo to ""
+        if checkoutResult contains "|CHECKIN:" then
+            set o to offset of "|CHECKIN:" in checkoutResult
+            set checkinInfo to text o thru -1 of checkoutResult
+        end if
+
+        if confirmResult is "SUCCESS" then
+            set checkoutResult to "SUCCESS: 퇴근 처리 완료" & checkinInfo
+        else
+            set checkoutResult to confirmResult & checkinInfo
+        end if
+    end if
 
     -- 탭 닫기
     delay 1
