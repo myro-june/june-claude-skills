@@ -1,0 +1,10 @@
+{
+  "name": "june-claude-skills",
+  "description": "june의 Claude Code 스킬 모음",
+  "version": "1.0.0",
+  "author": {
+    "name": "june"
+  },
+  "license": "MIT",
+  "skills": "./skills/"
+}

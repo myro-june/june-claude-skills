@@ -1,0 +1,15 @@
+{
+  "name": "june-claude-skills",
+  "description": "june의 Claude Code 스킬 모음",
+  "owner": {
+    "name": "june"
+  },
+  "plugins": [
+    {
+      "name": "june-claude-skills",
+      "description": "june의 Claude Code 스킬 모음 (네이버 웍스 출퇴근 등)",
+      "version": "1.0.0",
+      "source": "."
+    }
+  ]
+}
