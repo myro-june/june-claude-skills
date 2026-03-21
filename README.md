@@ -10,6 +10,7 @@ Claude Code 스킬 모음 플러그인
 | 퇴근 | `/june-claude-skills:퇴근` | 네이버 웍스 퇴근 체크 |
 | 웍스홈 | `/june-claude-skills:웍스홈` | Chrome에서 네이버 웍스 홈 페이지 열기 |
 | 세션요약 | `/june-claude-skills:세션요약` | 현재 세션 대화 내용 한줄 브리핑 요약 |
+| 잠자기 | `/june-claude-skills:잠자기` | Mac 즉시 잠자기 모드 전환 |
 
 ## 요구사항
 
@@ -51,6 +52,9 @@ Claude Code에서:
 
 # 세션요약 상세 모드
 /june-claude-skills:세션요약 --detail
+
+# 잠자기 (Mac 잠자기 모드)
+/june-claude-skills:잠자기
 ```
 
 ### 단축 커맨드 설정 (선택)
@@ -93,6 +97,16 @@ Chrome에서 네이버 웍스 홈 페이지를 엽니다.
 
 > `skills/세션요약/SKILL.md`의 내용을 그대로 복사합니다.
 
+**~/.claude/commands/잠자기.md**
+```markdown
+Mac을 즉시 잠자기 모드로 전환합니다.
+
+1. 아래 명령어를 실행합니다:
+pmset sleepnow
+
+2. "잠자기 모드로 전환합니다." 라고만 응답합니다.
+```
+
 > 플러그인 설치 경로는 `~/.claude/plugins/cache/` 하위에 있습니다. 출근/퇴근 스크립트 경로는 `find ~/.claude/plugins/cache -name "naver-works-checkin.sh"` 로 확인할 수 있습니다.
 
 ## 동작 방식
@@ -120,3 +134,4 @@ Chrome이 꺼져 있으면 자동으로 실행합니다. 기존 로그인 세션
 - 출근/퇴근/웍스홈: 근무 시간 외에는 출근 버튼이 표시되지 않을 수 있습니다
 - 출근/퇴근/웍스홈: macOS 전용입니다 (AppleScript 기반)
 - 세션요약: 대화 내용이 많을수록 정확한 요약을 제공합니다
+- 잠자기: macOS 전용입니다 (`pmset` 명령어 기반)
