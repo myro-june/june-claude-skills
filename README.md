@@ -13,9 +13,8 @@ Claude Code 스킬 모음 플러그인
 
 ## 요구사항
 
-- **macOS** (AppleScript 사용)
-- **Google Chrome**
 - **Claude Code CLI**
+- **macOS** + **Google Chrome** (출근/퇴근/웍스홈 스킬)
 
 ## 설치
 
@@ -27,7 +26,7 @@ Claude Code 스킬 모음 플러그인
 /plugin install june-claude-skills
 ```
 
-## 사전 설정 (최초 1회)
+## 사전 설정 (출근/퇴근/웍스홈)
 
 Chrome에서 AppleScript 실행을 허용해야 합니다:
 
@@ -91,47 +90,10 @@ Chrome에서 네이버 웍스 홈 페이지를 엽니다.
 ```
 
 **~/.claude/commands/세션요약.md**
-```markdown
-현재 세션의 대화 내용을 한줄 브리핑으로 요약합니다.
 
-## Workflow
+> `skills/세션요약/SKILL.md`의 내용을 그대로 복사합니다.
 
-### Step 1: 세션 컨텍스트 수집
-
-현재 대화 컨텍스트에서 지금까지 나눈 내용을 분석한다.
-
-### Step 2: 핵심 항목 추출
-
-다음을 파악한다:
-- **요청**: 사용자가 요청한 작업 목록
-- **완료**: 성공적으로 끝난 작업
-- **진행중**: 아직 완료되지 않은 작업
-- **결정사항**: 주요 의사결정이나 발견된 이슈
-
-### Step 3: 출력
-
-#### 기본 모드 (`/세션요약`)
-
-한줄 브리핑만 출력:
-📋 세션 요약: {한줄 요약 문장}
-
-#### 상세 모드 (`/세션요약 --detail`)
-
-한줄 브리핑 + 항목별 정리:
-📋 세션 요약: {한줄 요약 문장}
-  ✅ 완료: {완료 항목 나열}
-  🔄 진행중: {진행중 항목 나열}
-  📌 결정사항: {주요 결정 나열}
-
-## Rules
-
-- 한줄 요약은 반드시 한 문장으로 작성한다.
-- "무엇을 했고 어떻게 됐는지"에 초점을 맞춘다.
-- 진행 중인 작업이 있으면 현재 상태를 포함한다.
-- --detail 플래그가 없으면 한줄 브리핑만 출력한다.
-```
-
-> 플러그인 설치 경로는 `~/.claude/plugins/cache/` 하위에 있습니다. `find ~/.claude/plugins/cache -name "naver-works-checkin.sh"` 로 확인할 수 있습니다.
+> 플러그인 설치 경로는 `~/.claude/plugins/cache/` 하위에 있습니다. 출근/퇴근 스크립트 경로는 `find ~/.claude/plugins/cache -name "naver-works-checkin.sh"` 로 확인할 수 있습니다.
 
 ## 동작 방식
 
