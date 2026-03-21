@@ -8,6 +8,7 @@ Claude Code 스킬 모음 플러그인
 |------|--------|------|
 | 출근 | `/june-claude-skills:출근` | 네이버 웍스 출근 체크 |
 | 퇴근 | `/june-claude-skills:퇴근` | 네이버 웍스 퇴근 체크 |
+| 웍스홈 | `/june-claude-skills:웍스홈` | Chrome에서 네이버 웍스 홈 페이지 열기 |
 
 ## 요구사항
 
@@ -41,6 +42,9 @@ Claude Code에서:
 
 # 퇴근
 /june-claude-skills:퇴근
+
+# 웍스홈 (네이버 웍스 홈 페이지 열기)
+/june-claude-skills:웍스홈
 ```
 
 ### 단축 커맨드 설정 (선택)
@@ -69,6 +73,14 @@ Claude Code에서:
    - `SUCCESS` (CHECKIN 없음) → "퇴근 처리 완료되었습니다! 오늘도 수고하셨습니다."
    - `ALREADY: HH:MM|CHECKIN:HH:MM` → "이미 퇴근 상태입니다. HH:MM에 퇴근. (오늘 총 N시간 M분 근무)"
    - `FAIL` → 에러 내용을 분석하고 상황을 설명한다.
+```
+
+**~/.claude/commands/웍스홈.md**
+```markdown
+Chrome에서 네이버 웍스 홈 페이지를 엽니다.
+
+1. `open -a "Google Chrome" "https://home.worksmobile.com/"` 를 실행한다.
+2. "네이버 웍스 홈 페이지를 열었습니다." 라고 알려준다.
 ```
 
 > 플러그인 설치 경로는 `~/.claude/plugins/cache/` 하위에 있습니다. `find ~/.claude/plugins/cache -name "naver-works-checkin.sh"` 로 확인할 수 있습니다.
