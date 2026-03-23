@@ -11,7 +11,7 @@ if application "Google Chrome" is not running then
 end if
 
 try
-    -- 타임아웃 설정 (초 단위, 최악의 경우 총 약 52초)
+    -- 타임아웃 설정 (초 단위, 최악의 경우 총 약 56초: Chrome 기동 3 + 페이지 15 + 위젯 15 + 렌더링 1 + 통합폴링 20 + 탭닫기 1)
     set pageLoadTimeout to 15
     set widgetTimeout to 15
     set popupTimeout to 10
@@ -138,6 +138,7 @@ try
             set checkinDone to false
             set elapsedTime to 0
             set confirmClicked to false
+            set wasOnConfirmPage to false
             repeat while elapsedTime < totalTimeout
                 delay 1
                 set elapsedTime to elapsedTime + 1
@@ -148,7 +149,7 @@ try
                     set stateCheck to (execute javascript "
                         (function() {
                             if (window.location.href.indexOf('commuteDetail') !== -1) {
-                                return 'NOT_VERIFIED';
+                                return 'ON_CONFIRM_PAGE';
                             }
                             // 홈 페이지: 상태 텍스트는 span 등 비인터랙티브 요소에 렌더링될 수 있어 넓은 셀렉터 사용
                             var allEls = document.querySelectorAll('button, a, div, span');
@@ -166,6 +167,13 @@ try
                 if stateCheck is "VERIFIED" then
                     set checkinDone to true
                     exit repeat
+                end if
+
+                -- 확인 페이지 방문 추적: 홈으로 돌아오면 confirm 재클릭 방지
+                if stateCheck is "ON_CONFIRM_PAGE" then
+                    set wasOnConfirmPage to true
+                else if wasOnConfirmPage then
+                    set confirmClicked to true
                 end if
 
                 -- 아직 상태 미변경: 확인 버튼을 찾아서 클릭 시도 (아직 안 했으면)

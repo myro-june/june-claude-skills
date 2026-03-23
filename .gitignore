@@ -1,4 +1,7 @@
 **/.omc/
 **/.DS_Store
+.claude/
+.idea/
+.vscode/
 .env
 .env.*
