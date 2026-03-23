@@ -33,6 +33,10 @@ Chrome에서 AppleScript 실행을 허용해야 합니다:
 
 > Chrome 메뉴 바 → **보기** → **개발자** → **Apple Events의 자바스크립트 허용** 체크
 
+또한 Chrome 팝업 차단 설정을 확인해주세요:
+
+> Chrome 설정 → 개인정보 및 보안 → 사이트 설정 → 팝업 및 리디렉션 → `home.worksmobile.com` 허용 추가
+
 ## 사용법
 
 Claude Code에서:
@@ -59,67 +63,37 @@ Claude Code에서:
 
 ### 단축 커맨드 설정 (선택)
 
-`/출근`, `/퇴근`으로 짧게 사용하려면 `~/.claude/commands/`에 커맨드 파일을 추가합니다:
+`/출근`, `/퇴근`으로 짧게 사용하려면 `~/.claude/commands/`에 커맨드 파일을 추가합니다.
+각 스킬의 `SKILL.md` 내용을 참고하여 작성하세요. 스크립트 경로는 아래 명령어로 확인할 수 있습니다:
 
-**~/.claude/commands/출근.md**
-```markdown
-네이버 웍스 출근 체크를 실행합니다.
-
-1. `bash "<플러그인 설치 경로>/scripts/naver-works-checkin.sh"` 를 실행한다.
-2. 결과를 확인하고 사용자에게 알려준다.
-   - `ALREADY: HH:MM` → 현재 한국 시간(KST)과 출근 시간의 차이를 계산하여 "이미 출근 상태입니다. HH:MM에 출근하셨습니다. (현재 N시간 M분 근무 중)" 형식으로 알려준다.
-   - `ALREADY: (시간 확인 불가` → "이미 출근 상태입니다."
-   - `SUCCESS` → "출근 처리 완료되었습니다!"
-   - `FAIL` → 에러 내용을 분석하고 사용자에게 상황을 설명한다.
+```bash
+find ~/.claude/plugins/cache -name "naver-works-checkin.sh"
 ```
-
-**~/.claude/commands/퇴근.md**
-```markdown
-네이버 웍스 퇴근 체크를 실행합니다.
-
-1. `bash "<플러그인 설치 경로>/scripts/naver-works-checkout.sh"` 를 실행한다.
-2. 결과를 확인하고 사용자에게 알려준다.
-   - `SUCCESS....|CHECKIN:HH:MM` → 출근 시간에서 현재 시간을 빼서 "퇴근 처리 완료! 오늘 총 N시간 M분 근무하셨습니다." 로 알려준다.
-   - `SUCCESS` (CHECKIN 없음) → "퇴근 처리 완료되었습니다! 오늘도 수고하셨습니다."
-   - `ALREADY: HH:MM|CHECKIN:HH:MM` → "이미 퇴근 상태입니다. HH:MM에 퇴근. (오늘 총 N시간 M분 근무)"
-   - `FAIL` → 에러 내용을 분석하고 상황을 설명한다.
-```
-
-**~/.claude/commands/웍스홈.md**
-```markdown
-Chrome에서 네이버 웍스 홈 페이지를 엽니다.
-
-1. `open -a "Google Chrome" "https://home.worksmobile.com/"` 를 실행한다.
-2. "네이버 웍스 홈 페이지를 열었습니다." 라고 알려준다.
-```
-
-**~/.claude/commands/세션요약.md**
-
-> `skills/세션요약/SKILL.md`의 내용을 그대로 복사합니다.
-
-**~/.claude/commands/잠자기.md**
-```markdown
-Mac을 즉시 잠자기 모드로 전환합니다.
-
-1. 아래 명령어를 실행합니다:
-pmset sleepnow
-
-2. "잠자기 모드로 전환합니다." 라고만 응답합니다.
-```
-
-> 플러그인 설치 경로는 `~/.claude/plugins/cache/` 하위에 있습니다. 출근/퇴근 스크립트 경로는 `find ~/.claude/plugins/cache -name "naver-works-checkin.sh"` 로 확인할 수 있습니다.
 
 ## 동작 방식
 
-### 출근 / 퇴근 / 웍스홈
+### 출근 / 퇴근
 
 1. Chrome에서 새 탭으로 네이버 웍스 홈(`home.worksmobile.com`)을 엽니다
-2. 출근/퇴근 버튼을 자동으로 찾아 클릭합니다
-3. 확인 팝업이 뜨면 자동으로 확인 버튼을 클릭합니다
-4. 이미 출근/퇴근 상태라면 시간을 알려줍니다
-5. 완료 후 탭을 자동으로 닫습니다
+2. 페이지 로드 및 SPA 위젯 렌더링을 대기합니다 (폴링, 각 최대 15초)
+3. 출근/퇴근 버튼을 자동으로 찾아 클릭합니다
+4. 확인 모달이 뜨면 자동으로 확인 버튼을 클릭합니다
+5. 실제 상태 변경을 검증합니다 (폴링, 최대 10초)
+6. 이미 출근/퇴근 상태라면 시간과 근무 시간을 알려줍니다
+7. 완료 후 탭을 자동으로 닫습니다
 
 Chrome이 꺼져 있으면 자동으로 실행합니다. 기존 로그인 세션을 그대로 사용하므로 별도 로그인이 필요 없습니다.
+
+**결과 코드:**
+- `SUCCESS` — 처리 완료
+- `ALREADY` — 이미 출근/퇴근 상태 (시간 표시)
+- `FAIL_UNVERIFIED` — 버튼 클릭 후 상태 변경 미확인 (네트워크 지연 또는 팝업 차단)
+- `FAIL_NOT_CHECKEDIN` — 퇴근 시도 시 미출근 상태 (퇴근 전용)
+- `FAIL` — 기타 오류
+
+### 웍스홈
+
+Chrome에서 네이버 웍스 홈 페이지를 엽니다.
 
 ### 세션요약
 
@@ -128,6 +102,10 @@ Chrome이 꺼져 있으면 자동으로 실행합니다. 기존 로그인 세션
 3. `--detail` 옵션 사용 시 항목별 상세 정리도 함께 출력합니다
 
 외부 도구 없이 Claude의 대화 컨텍스트만으로 동작합니다.
+
+### 잠자기
+
+Mac을 즉시 잠자기 모드로 전환합니다 (`pmset sleepnow`).
 
 ## 주의사항
 
