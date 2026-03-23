@@ -21,11 +21,12 @@ Claude Code 스킬 모음 플러그인
 
 ```bash
 # 1. 마켓플레이스 추가
-/plugin marketplace add https://github.com/june/june-claude-skills
+/plugin marketplace add https://github.com/myro-june/june-claude-skills
 
 # 2. 플러그인 설치
 /plugin install june-claude-skills
 ```
+
 ## 사전 설정 (출근/퇴근/웍스홈)
 
 Chrome에서 AppleScript 실행을 허용해야 합니다:
@@ -114,8 +115,9 @@ pmset sleepnow
 
 1. Chrome에서 새 탭으로 네이버 웍스 홈(`home.worksmobile.com`)을 엽니다
 2. 출근/퇴근 버튼을 자동으로 찾아 클릭합니다
-3. 이미 출근/퇴근 상태라면 시간을 알려줍니다
-4. 완료 후 탭을 자동으로 닫습니다
+3. 확인 팝업이 뜨면 자동으로 확인 버튼을 클릭합니다
+4. 이미 출근/퇴근 상태라면 시간을 알려줍니다
+5. 완료 후 탭을 자동으로 닫습니다
 
 Chrome이 꺼져 있으면 자동으로 실행합니다. 기존 로그인 세션을 그대로 사용하므로 별도 로그인이 필요 없습니다.
 
