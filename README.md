@@ -21,12 +21,11 @@ Claude Code 스킬 모음 플러그인
 
 ```bash
 # 1. 마켓플레이스 추가
-/plugin marketplace add june/june-claude-skills
+/plugin marketplace add https://github.com/june/june-claude-skills
 
 # 2. 플러그인 설치
 /plugin install june-claude-skills
 ```
-
 ## 사전 설정 (출근/퇴근/웍스홈)
 
 Chrome에서 AppleScript 실행을 허용해야 합니다:
