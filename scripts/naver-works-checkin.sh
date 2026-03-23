@@ -62,7 +62,7 @@ tell application "Google Chrome"
                         var style = window.getComputedStyle(clickTargets[j]);
                         if (style.pointerEvents !== 'none' && style.opacity !== '0') {
                             clickTargets[j].click();
-                            return 'SUCCESS: 출근 버튼 클릭 완료';
+                            return 'CLICKED_FIRST';
                         }
                     }
                 }
@@ -84,6 +84,38 @@ tell application "Google Chrome"
             })();
         ")
     end tell
+
+    -- 첫 번째 출근 버튼 클릭 후 확인 팝업 처리
+    if checkinResult starts with "CLICKED_FIRST" then
+        -- 확인 팝업 로드 대기
+        delay 3
+
+        -- 확인 팝업에서 출근 버튼 클릭
+        tell active tab of front window
+            set confirmResult to (execute javascript "
+                (function() {
+                    var buttons = document.querySelectorAll('button, a, div[role=button]');
+                    for (var i = 0; i < buttons.length; i++) {
+                        var t = buttons[i].textContent.trim();
+                        if (t === '출근') {
+                            var style = window.getComputedStyle(buttons[i]);
+                            if (style.pointerEvents !== 'none' && style.opacity !== '0') {
+                                buttons[i].click();
+                                return 'SUCCESS';
+                            }
+                        }
+                    }
+                    return 'FAIL: 확인 팝업에서 출근 버튼을 찾지 못했습니다.';
+                })();
+            ")
+        end tell
+
+        if confirmResult is "SUCCESS" then
+            set checkinResult to "SUCCESS: 출근 처리 완료"
+        else
+            set checkinResult to confirmResult
+        end if
+    end if
 
     -- 탭 닫기
     delay 1
