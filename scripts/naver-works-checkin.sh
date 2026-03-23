@@ -131,9 +131,9 @@ try
             ")
         end tell
 
-        -- 첫 번째 출근 버튼 클릭 후 확인 팝업 처리
+        -- 첫 번째 출근 버튼 클릭 후 확인 페이지 처리
         if checkinResult starts with "CLICKED_FIRST" then
-            -- 통합 폴링: 상태 변경 확인 + 확인 팝업 클릭 (최대 popupTimeout + verifyTimeout 초)
+            -- 통합 폴링: 상태 변경 확인 + 확인 버튼 클릭 (최대 popupTimeout + verifyTimeout 초)
             set totalTimeout to popupTimeout + verifyTimeout
             set checkinDone to false
             set elapsedTime to 0

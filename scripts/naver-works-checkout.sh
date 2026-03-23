@@ -148,7 +148,7 @@ try
                 set checkinInfo to text o thru -1 of checkoutResult
             end if
 
-            -- 통합 폴링: 상태 변경 확인 + 확인 팝업 클릭 (최대 popupTimeout + verifyTimeout 초)
+            -- 통합 폴링: 상태 변경 확인 + 확인 버튼 클릭 (최대 popupTimeout + verifyTimeout 초)
             set totalTimeout to popupTimeout + verifyTimeout
             set checkoutDone to false
             set elapsedTime to 0
