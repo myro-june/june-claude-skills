@@ -148,79 +148,106 @@ try
                 set checkinInfo to text o thru -1 of checkoutResult
             end if
 
-            -- 통합 폴링: 상태 변경 확인 + 확인 버튼 클릭 (최대 popupTimeout + verifyTimeout 초)
-            set totalTimeout to popupTimeout + verifyTimeout
+            -- 통합 폴링: 상태 변경 확인 + 다중 팝업/페이지 처리 (최대 35초)
+            set totalTimeout to 35
             set checkoutDone to false
             set elapsedTime to 0
-            set confirmClicked to false
-            set wasOnConfirmPage to false
             repeat while elapsedTime < totalTimeout
                 delay 1
                 set elapsedTime to elapsedTime + 1
 
                 tell active tab of front window
-                    -- 먼저: 상태가 이미 변경되었는지 확인
-                    -- 확인 페이지(commuteDetail)에서는 홈으로 돌아온 후 검증, 홈에서는 직접 검증
-                    set stateCheck to (execute javascript "
+                    -- 현재 상태 확인 + 필요한 액션 수행을 하나의 JS로 처리
+                    set actionResult to (execute javascript "
                         (function() {
-                            // 확인 페이지에 있으면 아직 미검증 (확인 클릭 후 홈으로 돌아감)
-                            if (window.location.href.indexOf('commuteDetail') !== -1) {
-                                return 'ON_CONFIRM_PAGE';
-                            }
-                            // 홈 페이지: 상태 텍스트는 span 등 비인터랙티브 요소에 렌더링될 수 있어 넓은 셀렉터 사용
-                            var allEls = document.querySelectorAll('button, a, div, span');
-                            for (var i = 0; i < allEls.length; i++) {
-                                var text = allEls[i].textContent.trim();
-                                if (text.match(/^퇴근\\s*\\d{1,2}:\\d{2}$/)) {
-                                    return 'VERIFIED';
+                            var url = window.location.href;
+                            var isConfirmPage = url.indexOf('commuteDetail') !== -1;
+
+                            // === 홈 페이지 퇴근 완료 검증 ===
+                            if (!isConfirmPage && !document.querySelector('#docTitle')) {
+                                var allEls = document.querySelectorAll('button, a, div, span');
+                                for (var i = 0; i < allEls.length; i++) {
+                                    var text = allEls[i].textContent.trim();
+                                    if (text.match(/^퇴근\\s*\\d{1,2}:\\d{2}$/)) {
+                                        return 'VERIFIED';
+                                    }
                                 }
                             }
-                            return 'NOT_VERIFIED';
+
+                            // === 1순위: 시간 외 근로 확인 모달 ===
+                            var overtimeModal = document.querySelector('#overExtendConfirm');
+                            if (overtimeModal && overtimeModal.style.display === 'block') {
+                                var overtimeBtn = document.querySelector('#overExtendConfirm_yesBtn');
+                                if (overtimeBtn) {
+                                    overtimeBtn.click();
+                                    return 'CLICKED_OVERTIME';
+                                }
+                            }
+
+                            // === 2순위: 상신 확인 모달 ===
+                            var draftConfirmModal = document.querySelector('#__vd_wrap_draftConfirm');
+                            if (draftConfirmModal && draftConfirmModal.style.display !== 'none') {
+                                var okBtn = document.querySelector('#ganji_btn_od');
+                                if (okBtn) {
+                                    okBtn.click();
+                                    return 'DRAFT_SUBMITTED';
+                                }
+                            }
+
+                            // === 3순위: 근무 결과 신청 폼 ===
+                            var docTitle = document.querySelector('#docTitle');
+                            var draftBtn = document.querySelector('#_wrt_deco_draftBtn');
+                            if (docTitle && draftBtn) {
+                                // 제목 미입력 시 '퇴근' 입력
+                                if (!docTitle.value || docTitle.value.trim() === '') {
+                                    var setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                                    setter.call(docTitle, '퇴근');
+                                    docTitle.dispatchEvent(new Event('input', { bubbles: true }));
+                                    docTitle.dispatchEvent(new Event('change', { bubbles: true }));
+                                    return 'FILLED_TITLE';
+                                }
+                                // 제목 있으면 상신 클릭
+                                var style = window.getComputedStyle(draftBtn);
+                                var rect = draftBtn.getBoundingClientRect();
+                                if (style.pointerEvents !== 'none' && style.opacity !== '0' && rect.width > 0 && rect.height > 0) {
+                                    draftBtn.click();
+                                    return 'CLICKED_DRAFT';
+                                }
+                            }
+
+                            // === 4순위: commuteDetail 확인 페이지 버튼 ===
+                            var allBtns = document.querySelectorAll('button, a, div[role=button]');
+                            for (var i = 0; i < allBtns.length; i++) {
+                                var t = allBtns[i].textContent.trim();
+                                if (t === '퇴근' || (isConfirmPage && t === '확인')) {
+                                    var s = window.getComputedStyle(allBtns[i]);
+                                    var r = allBtns[i].getBoundingClientRect();
+                                    if (s.pointerEvents !== 'none' && s.opacity !== '0' && r.width > 0 && r.height > 0) {
+                                        allBtns[i].click();
+                                        return 'CLICKED';
+                                    }
+                                }
+                            }
+
+                            return 'WAITING';
                         })();
                     ")
                 end tell
 
-                if stateCheck is "VERIFIED" then
+                if actionResult is "VERIFIED" then
                     set checkoutDone to true
                     exit repeat
                 end if
 
-                -- 확인 페이지 방문 추적: 홈으로 돌아오면 confirm 재클릭 방지
-                if stateCheck is "ON_CONFIRM_PAGE" then
-                    set wasOnConfirmPage to true
-                else if wasOnConfirmPage then
-                    -- 확인 페이지에서 홈으로 돌아왔으면 confirm은 완료된 것
-                    set confirmClicked to true
+                -- 상신 완료 시 퇴근 처리 성공으로 간주
+                if actionResult is "DRAFT_SUBMITTED" then
+                    set checkoutDone to true
+                    delay 2
+                    exit repeat
                 end if
 
-                -- 아직 상태 미변경: 확인 버튼을 찾아서 클릭 시도 (아직 안 했으면)
-                if confirmClicked is false then
-                    tell active tab of front window
-                        set tryConfirm to (execute javascript "
-                            (function() {
-                                // 페이지 이동 감지: 확인 페이지(workplace.worksmobile.com)로 이동하면 전체 문서 검색
-                                var isConfirmPage = window.location.href.indexOf('commuteDetail') !== -1;
-
-                                // 확인 페이지 또는 모달이 있으면 '퇴근' 또는 '확인' 버튼 검색
-                                var allBtns = document.querySelectorAll('button, a, div[role=button]');
-                                for (var i = 0; i < allBtns.length; i++) {
-                                    var t = allBtns[i].textContent.trim();
-                                    if (t === '퇴근' || (isConfirmPage && t === '확인')) {
-                                        var style = window.getComputedStyle(allBtns[i]);
-                                        var rect = allBtns[i].getBoundingClientRect();
-                                        if (style.pointerEvents !== 'none' && style.opacity !== '0' && rect.width > 0 && rect.height > 0) {
-                                            allBtns[i].click();
-                                            return 'CLICKED';
-                                        }
-                                    }
-                                }
-
-                                return isConfirmPage ? 'WAITING_CONFIRM_PAGE' : 'WAITING';
-                            })();
-                        ")
-                    end tell
-                    if tryConfirm is "CLICKED" then set confirmClicked to true
-                end if
+                -- 클릭/입력 후 UI 반영 대기
+                if actionResult is not "WAITING" then delay 1
             end repeat
 
             if checkoutDone then
