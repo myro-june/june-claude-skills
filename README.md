@@ -11,13 +11,13 @@ Claude Code 스킬 모음 플러그인
 | 웍스홈 | `/june-claude-skills:웍스홈` | Chrome에서 네이버 웍스 홈 페이지 열기 |
 | 세션요약 | `/june-claude-skills:세션요약` | 현재 세션 대화 내용 한줄 브리핑 요약 |
 | 잠자기 | `/june-claude-skills:잠자기` | Mac 즉시 잠자기 모드 전환 |
-| 슬랙요약 | `/june-claude-skills:슬랙요약 <링크>` | 슬랙 메시지의 원문 기사를 요약하여 스레드에 게시 |
+| 슬랙기사링크요약 | `/june-claude-skills:슬랙기사링크요약 <링크>` | 슬랙 메시지의 원문 기사를 요약하여 스레드에 게시 |
 
 ## 요구사항
 
 - **Claude Code CLI**
 - **macOS** + **Google Chrome** (출근/퇴근/웍스홈 스킬)
-- **Slack MCP 서버** (슬랙요약 스킬)
+- **Slack MCP 서버** (슬랙기사링크요약 스킬)
 
 ## 설치
 
@@ -62,8 +62,8 @@ Claude Code에서:
 # 잠자기 (Mac 잠자기 모드)
 /june-claude-skills:잠자기
 
-# 슬랙요약 (슬랙 메시지 기사 요약)
-/june-claude-skills:슬랙요약 https://workspace.slack.com/archives/CHANNEL/pTIMESTAMP
+# 슬랙기사링크요약 (슬랙 메시지 기사 요약)
+/june-claude-skills:슬랙기사링크요약 https://workspace.slack.com/archives/CHANNEL/pTIMESTAMP
 ```
 
 ### 단축 커맨드 설정 (선택)
@@ -108,7 +108,7 @@ Chrome에서 네이버 웍스 홈 페이지를 엽니다.
 
 외부 도구 없이 Claude의 대화 컨텍스트만으로 동작합니다.
 
-### 슬랙요약
+### 슬랙기사링크요약
 
 1. 슬랙 메시지 링크에서 `channel_id`와 `message_ts`를 파싱합니다
 2. Slack MCP로 해당 메시지를 읽고 본문에서 외부 URL을 추출합니다
@@ -129,5 +129,5 @@ Mac을 즉시 잠자기 모드로 전환합니다 (`pmset sleepnow`).
 - 출근/퇴근/웍스홈: macOS 전용입니다 (AppleScript 기반)
 - 세션요약: 대화 내용이 많을수록 정확한 요약을 제공합니다
 - 잠자기: macOS 전용입니다 (`pmset` 명령어 기반)
-- 슬랙요약: Slack MCP 서버가 연결되어 있어야 합니다
-- 슬랙요약: 원문 링크가 없는 메시지인 경우 메시지 자체 내용을 요약합니다
+- 슬랙기사링크요약: Slack MCP 서버가 연결되어 있어야 합니다
+- 슬랙기사링크요약: 원문 링크가 없는 메시지인 경우 메시지 자체 내용을 요약합니다

@@ -1,6 +1,6 @@
 ---
-name: 슬랙요약
-description: 슬랙 메시지 링크를 받아 원문 기사를 요약하고 스레드에 댓글로 작성. 명시적으로 /슬랙요약 호출 시에만 실행.
+name: 슬랙기사링크요약
+description: 슬랙 메시지 링크를 받아 원문 기사를 요약하고 스레드에 댓글로 작성. 명시적으로 /슬랙기사링크요약 호출 시에만 실행.
 triggers: []
 argument-hint: "<slack-message-link>"
 ---
@@ -11,7 +11,7 @@ argument-hint: "<slack-message-link>"
 
 ## When to Activate
 
-사용자가 명시적으로 `/슬랙요약 <슬랙 메시지 링크>`를 입력했을 때만 실행.
+사용자가 명시적으로 `/슬랙기사링크요약 <슬랙 메시지 링크>`를 입력했을 때만 실행.
 
 ## Workflow
 
@@ -84,7 +84,7 @@ argument-hint: "<slack-message-link>"
 ## Examples
 
 ```
-/슬랙요약 https://s-tat.slack.com/archives/C0AH3GV8803/p1774071352435959
+/슬랙기사링크요약 https://s-tat.slack.com/archives/C0AH3GV8803/p1774071352435959
 ```
 
 ## Notes
