@@ -13,15 +13,7 @@ argument-hint: "<slack-message-link>"
 
 사용자가 명시적으로 `/슬랙기사링크요약 <슬랙 메시지 링크>`를 입력했을 때만 실행.
 
-## 실행 방식: 백그라운드 Agent
-
-**전체 워크플로우를 백그라운드 Agent로 위임한다.** 사용자가 `/슬랙기사링크요약`을 입력하면 즉시 Agent를 `run_in_background: true`로 스폰하고, 사용자에게 "기사 요약 중..." 한 줄만 알린 뒤 대화를 계속한다. Agent가 완료되면 자동 알림이 온다.
-
-**Agent 스폰 시 전달할 정보:**
-- 슬랙 메시지 링크
-- 이 SKILL.md의 Workflow 및 메시지 포맷 규칙 전체를 프롬프트로 전달
-
-## Workflow (Agent 내부에서 실행)
+## Workflow
 
 1. **슬랙 메시지 링크 파싱**
    - URL 형식: `https://{workspace}.slack.com/archives/{channel_id}/p{timestamp}`
