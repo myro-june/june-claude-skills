@@ -1,5 +1,6 @@
 {
-  "name": "june-claude-skills",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "june-skills",
   "description": "june의 Claude Code 스킬 모음",
   "owner": {
     "name": "june"
@@ -11,5 +12,6 @@
       "version": "1.0.0",
       "source": "./"
     }
-  ]
+  ],
+  "version": "1.0.0"
 }
