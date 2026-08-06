@@ -17,6 +17,7 @@ Claude Code 스킬 모음 플러그인
 | 바로메모하루조회 | `/june-claude-skills:바로메모하루조회` | 하루 인박스 메모 목록 조회 |
 | 바로메모주간조회 | `/june-claude-skills:바로메모주간조회` | 주간 인박스 메모 목록 조회 |
 | 바로메모앱 | `/june-claude-skills:바로메모앱` | 메모.app 열기 및 포커스 |
+| diff설명 | `/june-claude-skills:diff설명` | 현재 브랜치 변경사항을 Background–Intuition–Code–Quiz 구조의 대화형 HTML 설명서로 생성 |
 
 ## 요구사항
 
@@ -24,6 +25,7 @@ Claude Code 스킬 모음 플러그인
 - **macOS** + **Google Chrome** (출근/퇴근/웍스홈 스킬)
 - **Slack MCP 서버** (슬랙기사링크요약 스킬)
 - **macOS 메모.app** (바로메모 스킬)
+- **explain-diff-gate 훅** (diff설명 스킬의 PR 게이트 연동, `~/.claude/hooks/explain-diff-gate.py` — 없으면 스킬 단독 실행은 가능하나 마커 기록이 생략됨)
 
 ## 설치
 
@@ -170,6 +172,17 @@ macOS 메모.app에 빠르게 메모를 생성합니다. AppleScript(`osascript`
 ### 바로메모하루조회 / 바로메모주간조회
 
 각각 `001-하루 인박스`, `002-주간 인박스`의 메모 목록을 번호와 함께 표시합니다.
+
+### diff설명
+
+[Geoffrey Litt의 explain-diff 프롬프트](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524) 기반.
+
+1. `explain-diff-gate.py --info`로 기본 브랜치와의 merge-base 기준 diff 범위를 확인합니다
+2. 변경사항과 주변 코드를 읽고 Background–Intuition–Code–Quiz 4섹션의 자체 포함 HTML 설명서를 생성합니다 (`~/.claude/explain-diff/<repo-slug>/` 저장, 산문 한국어)
+3. `--mark`로 diff 내용 해시 마커를 기록합니다 — PR 생성 게이트(`gh pr create` 차단 훅)가 이 마커로 설명서 존재·신선도를 검증합니다
+4. 브라우저로 결과를 엽니다
+
+마커는 HEAD sha가 아니라 diff 내용 해시 기반이라, 설명서 생성 후 커밋해도 stale 처리되지 않습니다.
 
 ## 주의사항
 
