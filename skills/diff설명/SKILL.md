@@ -1,4 +1,5 @@
 ---
+name: diff설명
 description: 현재 브랜치의 코드 변경사항을 Background–Intuition–Code–Quiz 구조의 대화형 HTML 설명서로 생성합니다. PR 생성 전 explain-diff-gate 훅과 연동되어 마커를 기록합니다.
 ---
 
