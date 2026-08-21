@@ -26,6 +26,7 @@ Claude Code 스킬 모음 플러그인
 - **Slack MCP 서버** (슬랙기사링크요약 스킬)
 - **macOS 메모.app** (바로메모 스킬)
 - **explain-diff-gate 훅** (diff설명 스킬의 PR 게이트 연동, `~/.claude/hooks/explain-diff-gate.py` — 없으면 스킬 단독 실행은 가능하나 마커 기록이 생략됨. 정본 백업은 이 레포 `hooks/explain-diff-gate.py`, 설치: `cp hooks/explain-diff-gate.py ~/.claude/hooks/`)
+- **omc-skill-config** (OMC 실행 모드 설정 SSOT, `~/.claude/omc-skill-config/*.md` — 정본 백업은 이 레포 `omc-skill-config/`, 설치: `cp omc-skill-config/*.md ~/.claude/omc-skill-config/`)
 
 ## 설치
 
