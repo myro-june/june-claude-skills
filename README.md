@@ -25,7 +25,7 @@ Claude Code 스킬 모음 플러그인
 - **macOS** + **Google Chrome** (출근/퇴근/웍스홈 스킬)
 - **Slack MCP 서버** (슬랙기사링크요약 스킬)
 - **macOS 메모.app** (바로메모 스킬)
-- **explain-diff-gate 훅** (diff설명 스킬의 PR 게이트 연동, `~/.claude/hooks/explain-diff-gate.py` — 없으면 스킬 단독 실행은 가능하나 마커 기록이 생략됨)
+- **explain-diff-gate 훅** (diff설명 스킬의 PR 게이트 연동, `~/.claude/hooks/explain-diff-gate.py` — 없으면 스킬 단독 실행은 가능하나 마커 기록이 생략됨. 정본 백업은 이 레포 `hooks/explain-diff-gate.py`, 설치: `cp hooks/explain-diff-gate.py ~/.claude/hooks/`)
 
 ## 설치
 
@@ -178,7 +178,7 @@ macOS 메모.app에 빠르게 메모를 생성합니다. AppleScript(`osascript`
 [Geoffrey Litt의 explain-diff 프롬프트](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524) 기반.
 
 1. `explain-diff-gate.py --info`로 기본 브랜치와의 merge-base 기준 diff 범위를 확인합니다
-2. 변경사항과 주변 코드를 읽고 Background–Intuition–Code–Quiz 4섹션의 자체 포함 HTML 설명서를 생성합니다 (`~/.claude/explain-diff/<repo-slug>/` 저장, 산문 한국어)
+2. `skills/diff설명/template.html` 골격을 복사해 Background–Intuition–Code–Quiz 4섹션의 자체 포함 HTML 설명서를 채웁니다 (`~/.claude/explain-diff/<repo-slug>/` 저장, 산문 한국어 — 구조·스타일 사양은 템플릿+게이트 26항 검사가 보장)
 3. `--mark`로 diff 내용 해시 마커를 기록합니다 — PR 생성 게이트(`gh pr create` 차단 훅)가 이 마커로 설명서 존재·신선도를 검증합니다
 4. 브라우저로 결과를 엽니다
 
