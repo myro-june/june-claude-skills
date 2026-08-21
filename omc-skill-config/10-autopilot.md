@@ -23,6 +23,8 @@ Phase 4는 **3-stage gate (Stage 0 → Stage 1 → Stage 2)**로 실행한다. S
 3. **Stage 2 (나머지 9개)** 단일 메시지 병렬 호출 → 회수 → audit → 종합
 4. Stage 2 전원 APPROVE 시 Phase 4 통과. (단, **부분 재실행으로 깨끗해진 경우는 종료가 아니라 Stage 0부터 재시작** — 아래 REJECT 처리 참조.)
 
+**웨이브 회수 (MANDATORY — 2026-08-21 신설)**: 각 Stage 의 회수·audit·종합이 끝나면 그 웨이브의 팀메이트를 **전원 TaskStop** 하고 audit 표 말미에 `회수: N명 TaskStop` 행을 기재한다 — canonical 은 `40-common-loop.md` 「팀메이트·백그라운드 태스크 회수(reap)」(같은 라운드 내 재질의 필요 시 라운드 종료까지만 유예). Phase 4 통과·정지 시에는 같은 절의 **더미 TaskStop 전수 검증**으로 잔여 0 을 확증한다 (2026-08-21 실사고: 미회수 팀메이트 71개 15시간 잔존).
+
 **왜 Stage 0 가 앞인가**: Stage 0 가 잡는 결함(계획 항목 누락·계획 밖 변경·호출자 미갱신·자매 비대칭)은 발견 즉시 **큰 수정**을 부르고 다른 슬롯의 판정 전제를 전부 무효화한다. Stage 2 끝에서 발견하면 4+9 슬롯(Codex 유료 3건 포함)을 엉뚱한 코드에 쓰고 한 라운드를 버린다. 그래서 **"리뷰할 자격이 있는 코드인가"** 를 Task 2 + Bash 1 로 먼저 싸게 묻는다 — 코드가 수정된 뒤의 다음 호출은 항상 Stage 0 부터다(Stage 2 내부 부분 재실행만 예외 — 그 루프는 P 카운터로 닫히고, 클린 후 Stage 0 부터 재시작할 때 Stage 0 가 누적 수정을 한 번에 본다).
 
 **REJECT 처리**:
@@ -219,7 +221,7 @@ REJECT를 받아 코드를 수정할 때:
 - [ ] A-Codex — Bash `node "${CLAUDE_PLUGIN_ROOT}/scripts/codex-companion.mjs" task --fresh "<…>"` (run_in_background=true) — **`--write` 없음 확인: [Y]** / 본문 전문(frontmatter 제거) 주입 확인: [Y] / 마커 포함: [Y]
 - [ ] B — **실제 사용한 `subagent_type` 값을 여기 적을 것: __________** (allowlist: **`change-impact-reviewer`** 단 하나. prompt 선두에 `[stage0:change-impact]` 마커 + diff + **자매 축 선언** + 옛 값 + 이월 + override 3줄)
 
-**MANDATORY — Stage 0 호출 메시지 자체 검증**: 메시지 전송 직전, 위 3개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 3개 미만이면 전송 금지. Stage 1 호출과 같은 메시지 금지. override 3줄(리뷰 전용·판정 규칙·입력 고정) 포함 여부 별도 확인. **PreToolUse 훅(`omc-guard.py`)이 allowlist·마커·`--write` 를 차단하고, Stop 훅(`omc-stage1-audit.py`)이 3슬롯 완결성을 사후 감사한다.**
+**MANDATORY — Stage 0 호출 메시지 자체 검증**: 메시지 전송 직전, 위 3개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 3개 미만이면 전송 금지. Stage 1 호출과 같은 메시지 금지. override 3줄(리뷰 전용·판정 규칙·입력 고정) 포함 여부 별도 확인. **선제 이중 채널·직전 웨이브 회수 (2026-08-21)**: Task 프롬프트에 `40-common-loop.md` 「선제 이중 채널」 보고 지시가 있는지(A-Codex 는 read-only 라 제외 — `55-stage0-gate.md` 회수 절), 직전 웨이브 audit 표에 `회수:` 행이 있는지 함께 확인 — 없으면 TaskStop 후 진입. **PreToolUse 훅(`omc-guard.py`)이 allowlist·마커·`--write` 를 차단하고, Stop 훅(`omc-stage1-audit.py`)이 3슬롯 완결성을 사후 감사한다.**
 
 **MANDATORY — Stage 0 회수 검증**: Task 2건은 Task 결과, A-Codex 는 BashOutput 폴링으로 회수 완료까지 대기. 회수 못 한 슬롯은 **APPROVE 카운트 금지**, 재호출. `판정:` 라인·카운트 없는 응답 = 회수 실패. **`판정: INPUT_MISSING` = 오케스트레이터 입력 누락 신호** — APPROVE/REJECT 어느 쪽으로도 세지 않고 입력 보강 후 같은 라운드 재호출(카운터 미증가, 3회째면 사용자 보고).
 
@@ -291,7 +293,7 @@ REJECT를 받아 코드를 수정할 때:
       (allowlist: **`ocr-delegate-reviewer`** 단 하나. 다른 값이면 호출 금지 — PreToolUse 훅이 차단한다.
        prompt = delegate-review.md 전문 + override 3줄 + scope 인자. `53-ocr-review.md` 호출 패턴 준수)
 
-**MANDATORY — Stage 1 호출 메시지 자체 검증**: 메시지 전송 직전, 위 4개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 4개 미만이면 메시지 전송 금지하고 누락분 추가 후 재작성. "이번엔 일부만 호출했고 나머지는 다음 메시지에"는 **금지**. ocr:delegate-review 호출 시 override 3줄(review-only / 판정 규칙 / scope 고정) 포함 여부 별도 확인. **경로 프리플라이트 (MANDATORY — 2026-08-21 신설)**: 호출 프롬프트에 넣은 파일 경로 전건을 `ls` 실측으로 확인(실패 0건)한 뒤 전송한다 — 오경로 1건이 그 웨이브 전체의 재확인 왕복을 만든다 (실측 근거는 Stage 2 자체 검증 절).
+**MANDATORY — Stage 1 호출 메시지 자체 검증**: 메시지 전송 직전, 위 4개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 4개 미만이면 메시지 전송 금지하고 누락분 추가 후 재작성. "이번엔 일부만 호출했고 나머지는 다음 메시지에"는 **금지**. ocr:delegate-review 호출 시 override 3줄(review-only / 판정 규칙 / scope 고정) 포함 여부 별도 확인. **경로 프리플라이트 (MANDATORY — 2026-08-21 신설)**: 호출 프롬프트에 넣은 파일 경로 전건을 `ls` 실측으로 확인(실패 0건)한 뒤 전송한다 — 오경로 1건이 그 웨이브 전체의 재확인 왕복을 만든다 (실측 근거는 Stage 2 자체 검증 절). **선제 이중 채널·직전 웨이브 회수 (2026-08-21)**: ocr Task 프롬프트에 「선제 이중 채널」 보고 지시(40-common), 직전 웨이브 audit 표의 `회수:` 행을 함께 확인한다(codex 3건은 Bash stdout 회수라 파일 지시 제외).
 
 **MANDATORY — Stage 1 회수 검증**: `run_in_background=true`로 띄운 codex Bash 호출 3건은 BashOutput으로 stdout 회수 완료까지 대기, ocr Task 1건은 Task 결과 회수 완료까지 대기. 회수 못 한 reviewer는 **APPROVE로 카운트 금지**, maxValidationRounds 한도 내 재호출. "타임아웃이라 N/A" 처리 금지.
 
@@ -355,7 +357,7 @@ REJECT를 받아 코드를 수정할 때:
 - [ ] Skill(skill="security-review")
 - [ ] Skill(skill="pr-review-toolkit:review-pr") — **원판정 매핑: Critical=0 AND Important=0 → APPROVE / 그 외 → REJECT** (최종판정은 scope 분류 경유 — 단 Critical·Important는 **scope 밖이어도 차단**), Suggestions은 minor 이슈로 별도 기록
 
-**MANDATORY — Stage 2 호출 메시지 자체 검증**: 메시지 전송 직전, 위 9개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 9개 미만이면 메시지 전송 금지하고 누락분 추가 후 재작성. "이번엔 7개만 호출했고 나머지는 다음 메시지에"는 **금지**. code-simplifier subagent 호출 시 review-only 제약 프롬프트 포함됐는지 별도 확인. Skill(pr-review-toolkit:review-pr) 호출 시 **원판정** 매핑 규칙(Critical=0 AND Important=0 → APPROVE)을 메시지 본문에 명시 포함했는지 별도 확인 (최종판정은 scope 분류 경유). **경로 프리플라이트 (MANDATORY — 2026-08-21 신설)**: 호출 프롬프트에 넣은 파일 경로 전건을 `ls` 실측으로 확인(실패 0건)한 뒤 전송한다 — 오경로 1건이 그 슬롯의 판정 전제를 오염시켜 웨이브 전체의 재확인 왕복을 만든다 (2026-08-21 STAT-589 실측: #13 웨이브에 오경로 1건 → 3개 서브에이전트 재확인 왕복 8건·10분+ 소모, 정정 확인 메시지가 라운드를 늘렸다).
+**MANDATORY — Stage 2 호출 메시지 자체 검증**: 메시지 전송 직전, 위 9개 항목이 **단일 메시지 내 tool_use 블록에 빠짐없이** 포함됐는지 확인. 9개 미만이면 메시지 전송 금지하고 누락분 추가 후 재작성. "이번엔 7개만 호출했고 나머지는 다음 메시지에"는 **금지**. code-simplifier subagent 호출 시 review-only 제약 프롬프트 포함됐는지 별도 확인. Skill(pr-review-toolkit:review-pr) 호출 시 **원판정** 매핑 규칙(Critical=0 AND Important=0 → APPROVE)을 메시지 본문에 명시 포함했는지 별도 확인 (최종판정은 scope 분류 경유). **경로 프리플라이트 (MANDATORY — 2026-08-21 신설)**: 호출 프롬프트에 넣은 파일 경로 전건을 `ls` 실측으로 확인(실패 0건)한 뒤 전송한다 — 오경로 1건이 그 슬롯의 판정 전제를 오염시켜 웨이브 전체의 재확인 왕복을 만든다 (2026-08-21 STAT-589 실측: #13 웨이브에 오경로 1건 → 3개 서브에이전트 재확인 왕복 8건·10분+ 소모, 정정 확인 메시지가 라운드를 늘렸다). **선제 이중 채널·직전 웨이브 회수 (2026-08-21)**: 9개 Task/Skill 프롬프트에 「선제 이중 채널」 보고 지시(40-common), 직전 웨이브 audit 표의 `회수:` 행을 함께 확인한다.
 
 **MANDATORY — Stage 2 회수 검증**: 모든 reviewer 결과 회수 완료까지 대기. 회수 못 한 reviewer는 **APPROVE로 카운트 금지**, 재호출. "타임아웃이라 N/A" 처리 금지.
 
@@ -455,6 +457,16 @@ Stage 2에서 `pr-review-toolkit:review-pr`의 **comment-analyzer만** blocking�
 - 행은 **R1부터 전 라운드 누적** — 이번 라운드만 떼어 보고하면 추이(발산·정체·수렴)가 안 보인다. 부분 재실행은 해당 라운드 행의 「처리」에 요약.
 - 「신규/이월」= 각 Stage audit 표의 `신규 __건 / 이월 재지적 __건` 합산 — 발산·Deadlock 판정과 **같은 입력값**을 쓴다(별도 집계 금지 — 두 수치가 갈리면 한쪽이 오염).
 - 「시각」은 deferred 파일 「라운드 기록」 줄에서 그대로 가져온다 (이중 기록이 아니라 **같은 기록의 표시** — 라운드 기록이 SSOT).
+
+---
+
+### Phase 5 — PR 생성 전 diff 설명서 선행 (MANDATORY — 2026-08-21 신설)
+
+Phase 4 통과 후 커밋·푸시 다음, `gh pr create` **전에** `diff설명` 스킬을 실행한다(스킬 폴더 `template.html` 복사 → 채움 → `--mark`). 결정론 강제 지점은 PreToolUse 훅 `explain-diff-gate.py`(마커 없으면 PR 차단)이며, 본 절은 그 차단-재시도 왕복을 없애는 **선행 배치**다 (2026-08-21 실사고: Phase 5 가 게이트 존재를 몰라 PR 차단 → 그제야 설명서 작성 → 재시도).
+
+- ⚠️ `--mark` 는 **단독 Bash 명령**으로 실행 — `gh pr create` 와 한 명령에 합치면 훅이 명령 **전체**를 선차단해 `--mark` 자체가 실행되지 않는다.
+- 스킬 호출명은 `diff설명`(사용자 레벨 등록). 이름 해석이 실패하면 `~/.claude/skills/diff설명/SKILL.md` **전문을 Read** 하고 그대로 따른다 — 게이트 26항 검사를 통과해야 마커가 기록된다(폴백에서 SKILL.md 를 안 읽으면 표 밖 사양이 빠진다 — 08-21 실사고 3회째 패턴).
+- **PR 생성 직전 체크**: `[ ] diff설명 마커 기록됨(--check 통과)` `[ ] 팀메이트 더미 TaskStop 전수 검증 잔여 0(40-common 「reap」)`.
 
 ---
 
