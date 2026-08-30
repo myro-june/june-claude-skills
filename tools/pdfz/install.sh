@@ -29,6 +29,16 @@ else
   exit 1
 fi
 
+# 1-b) mutool (결과 검증용 페이지 추출) — mupdf-tools
+if command -v mutool >/dev/null 2>&1 || [[ -x /opt/homebrew/bin/mutool ]]; then
+  echo "✓ mutool 확인됨"
+elif command -v brew >/dev/null 2>&1; then
+  echo "· mupdf-tools 설치 중 (brew)..."
+  brew install mupdf-tools
+else
+  echo "⚠ mutool 없음 — 결과 검증(페이지 손실 감지)이 생략됩니다."
+fi
+
 # 2) Python venv + img2pdf (이미지화 폴백용)
 PY=""
 for c in /opt/homebrew/bin/python3 python3; do
@@ -48,7 +58,8 @@ echo "· img2pdf 설치..."
 
 # 3) 엔진 스크립트 배치
 install -m 0755 "$SCRIPT_DIR/pdfz.sh" "$PREFIX/pdfz.sh"
-echo "✓ 엔진 스크립트: $PREFIX/pdfz.sh"
+install -m 0644 "$SCRIPT_DIR/pdfz_engine.py" "$PREFIX/pdfz_engine.py"
+echo "✓ 엔진: $PREFIX/pdfz.sh + pdfz_engine.py"
 
 # 4) Finder Quick Action 설치
 mkdir -p "$SERVICES"
