@@ -19,6 +19,14 @@ Claude Code 스킬 모음 플러그인
 | 바로메모앱 | `/june-claude-skills:바로메모앱` | 메모.app 열기 및 포커스 |
 | diff설명 | `/june-claude-skills:diff설명` | 현재 브랜치 변경사항을 Background–Intuition–Code–Quiz 구조의 대화형 HTML 설명서로 생성 |
 
+## 도구 (플러그인과 별개, 단독 설치)
+
+플러그인 스킬이 아니라 레포에 함께 담아둔 독립 macOS 유틸리티. `/plugin install`이 아니라 각 폴더의 `install.sh`로 설치한다.
+
+| 도구 | 설명 | 설치 |
+|------|------|------|
+| [pdfz](tools/pdfz/) | Finder 우클릭으로 PDF 용량 압축 (텍스트 유지 우선, 안 되면 이미지화) | `cd tools/pdfz && ./install.sh` |
+
 ## 요구사항
 
 - **Claude Code CLI**
