@@ -27,7 +27,7 @@ for f in "$@"; do
   esac
   [[ -f "$f" ]] || continue
 
-  dir="${f:h}"; name="${f:t:r}"; out="$dir/${name}_압축.pdf"
+  dir="${f:h}"; name="${f:t:r}"; out="$dir/${name}_압축저화질.pdf"
 
   res="$("$PYZ" "$ENGINE" "$f" "$out" 2>/dev/null)"
 
@@ -52,6 +52,6 @@ for f in "$@"; do
     notify "PDF 압축" "이미 최적화된 PDF라 더 줄지 않아 원본을 유지합니다" "${name}.pdf"
   else
     pct=$(( 100 - final * 100 / orig ))
-    notify "PDF 압축 완료 (${method})" "$(human $orig) → $(human $final)  (−${pct}%)" "${name}_압축.pdf"
+    notify "PDF 압축 완료 (${method})" "$(human $orig) → $(human $final)  (−${pct}%)" "${name}_압축저화질.pdf"
   fi
 done
