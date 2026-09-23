@@ -17,7 +17,6 @@ Claude Code 스킬 모음 플러그인
 | 바로메모하루조회 | `/june-claude-skills:바로메모하루조회` | 하루 인박스 메모 목록 조회 |
 | 바로메모주간조회 | `/june-claude-skills:바로메모주간조회` | 주간 인박스 메모 목록 조회 |
 | 바로메모앱 | `/june-claude-skills:바로메모앱` | 메모.app 열기 및 포커스 |
-| diff설명 | `/june-claude-skills:diff설명` | 현재 브랜치 변경사항을 Background–Intuition–Code–Quiz 구조의 대화형 HTML 설명서로 생성 |
 
 ## 도구 (플러그인과 별개, 단독 설치)
 
@@ -33,7 +32,6 @@ Claude Code 스킬 모음 플러그인
 - **macOS** + **Google Chrome** (출근/퇴근/웍스홈 스킬)
 - **Slack MCP 서버** (슬랙기사링크요약 스킬)
 - **macOS 메모.app** (바로메모 스킬)
-- **explain-diff-gate 훅** (diff설명 스킬의 PR 게이트 연동, `~/.claude/hooks/explain-diff-gate.py` — 없으면 스킬 단독 실행은 가능하나 마커 기록이 생략됨. 정본 백업은 이 레포 `hooks/explain-diff-gate.py`, 설치: `cp hooks/explain-diff-gate.py ~/.claude/hooks/`)
 
 ## 설치
 
@@ -181,16 +179,12 @@ macOS 메모.app에 빠르게 메모를 생성합니다. AppleScript(`osascript`
 
 각각 `001-하루 인박스`, `002-주간 인박스`의 메모 목록을 번호와 함께 표시합니다.
 
-### diff설명
+### diff설명 (ai-stack 으로 이관)
 
-[Geoffrey Litt의 explain-diff 프롬프트](https://gist.github.com/geoffreylitt/a29df1b5f9865506e8952488eac3d524) 기반.
-
-1. `explain-diff-gate.py --info`로 기본 브랜치와의 merge-base 기준 diff 범위를 확인합니다
-2. `skills/diff설명/template.html` 골격을 복사해 Background–Intuition–Code–Quiz 4섹션의 자체 포함 HTML 설명서를 채웁니다 (`~/.claude/explain-diff/<repo-slug>/` 저장, 산문 한국어 — 구조·스타일 사양은 템플릿+게이트 26항 검사가 보장)
-3. `--mark`로 diff 내용 해시 마커를 기록합니다 — PR 생성 게이트(`gh pr create` 차단 훅)가 이 마커로 설명서 존재·신선도를 검증합니다
-4. 브라우저로 결과를 엽니다
-
-마커는 HEAD sha가 아니라 diff 내용 해시 기반이라, 설명서 생성 후 커밋해도 stale 처리되지 않습니다.
+2026-09-23 이 레포에서 뺐다. 스킬(`skills/diff설명/`)과 PR 게이트 훅 사본(`hooks/explain-diff-gate.py`·`hooks/explain-diff-gate.test.py`)의
+정본은 ai-stack 레포(`claude/skills/diff설명/`·`claude/hooks/explain-diff-gate.py`)이고, 설치·갱신도 거기서 한다.
+두 벌을 두는 동안 이쪽 사본이 옛 판(PR 생성 뒤 `open <HTML>` 로 직접 열기)으로 남아, PR 퀴즈가 「혼자 떴다 꺼졌다 다시 PR 과 함께 뜨는」
+깜빡임을 되살릴 수 있는 경로가 됐다 — 여는 주체는 ai-stack 의 gh 래퍼 하나다.
 
 ## 주의사항
 
